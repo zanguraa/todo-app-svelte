@@ -4,14 +4,26 @@
   import Button from './Button.svelte';
   import { createEventDispatcher, afterUpdate } from 'svelte';
   import FaRegTrashAlt from 'svelte-icons/fa/FaRegTrashAlt.svelte';
+  import { scale } from 'svelte/transition';
+  import { flip } from 'svelte/animate';
   export let error = null;
   export let isLoading = false;
   export let disabledAdding = false;
   export let disabledRemoving = [];
+  export let scrollOnAdd = undefined;
 
   afterUpdate(() => {
-    if (autoscroll) listDiv.scrollTo(0, listDivScrollHeight);
+    if(scrollOnAdd) {
+      let pos;
+      if (scrollOnAdd === 'top') {
+        pos = 0;
+      } if (scrollOnAdd === 'bottom') {
+        pos = listDivScrollHeight;
+      }
+      if (autoscroll) listDiv.scrollTo(0, pos);
     autoscroll = false;
+    }
+    
   });
 
   export let todos = null;
@@ -76,9 +88,10 @@
           <ul>
             {#each todos as todo (todo.id)}
             {@const { id, title, completed } = todo}
-              <li>
+
+              <li animate:flip>
                 <slot {todo} {handleToggleTodo}>
-                  <div class:completed>
+                  <div transition:scale|local={{start: 0.5}} class:completed>
                     <label>
                       <input
                         disabled={disabledRemoving.includes(id)}

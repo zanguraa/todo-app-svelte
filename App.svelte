@@ -2,6 +2,7 @@
   import TodoList from './lib/TodoList.svelte';
   import { v4 as uuid } from 'uuid';
   import { onMount, tick } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
 
   let todoList;
   let showList = true;
@@ -43,10 +44,10 @@
     }).then(async (response) => {
       if (response.ok) {
         const todo = await response.json();
-        todos = [...todos, { ...todo, id: uuid() }];
+        todos = [{ ...todo, id: uuid() }, ...todos];
         todoList.clearInput();
       } else {
-        alert("an error has occured");
+        alert('an error has occured');
       }
     });
     isAdding = false;
@@ -55,25 +56,24 @@
   }
   async function handleRemoveTodo(event) {
     const id = event.detail.id;
-    if(disabledItems.includes(id)) return;
+    if (disabledItems.includes(id)) return;
     disabledItems = [...disabledItems, id];
-   await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+    await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
       method: 'DELETE'
     }).then(async (response) => {
       if (response.ok) {
         todos = todos.filter((t) => t.id !== event.detail.id);
       } else {
-        alert("an error has occured");
+        alert('an error has occured');
       }
     });
-disabledItems = disabledItems.filter((i) => i !== id);
-   
+    disabledItems = disabledItems.filter((i) => i !== id);
   }
 
   async function handleToggleTodo(event) {
     const id = event.detail.id;
     const value = event.detail.value;
-    if(disabledItems.includes(id)) return;
+    if (disabledItems.includes(id)) return;
     disabledItems = [...disabledItems, id];
     await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
       method: 'PATCH',
@@ -85,7 +85,7 @@ disabledItems = disabledItems.filter((i) => i !== id);
       }
     }).then(async (response) => {
       if (response.ok) {
-       const updateTodo = await response.json();
+        const updateTodo = await response.json();
         todos = todos.map((todo) => {
           if (todo.id === event.detail.id) {
             return updateTodo;
@@ -93,11 +93,10 @@ disabledItems = disabledItems.filter((i) => i !== id);
           return { ...todo };
         });
       } else {
-        alert("an error has occured");
+        alert('an error has occured');
       }
     });
     disabledItems = disabledItems.filter((i) => i !== id);
-
   }
 </script>
 
@@ -106,21 +105,29 @@ disabledItems = disabledItems.filter((i) => i !== id);
   Show/Hide list
 </label>
 {#if showList}
-  <div style:max-width="400px">
+  <div transition:fade style:max-width="400px">
     <TodoList
       {todos}
       {error}
       {isLoading}
       disabledAdding={isAdding}
+      scrollOnAdd="top"
       bind:this={todoList}
       on:addtodo={handleAddTodo}
       on:removetodo={handleRemoveTodo}
       on:toggletodo={handleToggleTodo}
       let:todo
       let:handleToggleTodo
-    >
-  </TodoList>
+    />
   </div>
+  {#if todos}
+    <p>
+      Number of todos: {#key todos.length}<span
+          style:display="inline-block"
+          in:fly|local={{ y: -10 }}>{todos.length}</span
+        >{/key}
+    </p>
+  {/if}
 {/if}
 
 <style>
