@@ -46,6 +46,7 @@
         const todo = await response.json();
         todos = [{ ...todo, id: uuid() }, ...todos];
         todoList.clearInput();
+        console.log(todos);
       } else {
         alert('an error has occured');
       }
