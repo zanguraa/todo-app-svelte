@@ -106,7 +106,7 @@
   Show/Hide list
 </label>
 {#if showList}
-  <div transition:fade style:max-width="800px">
+  <div class="container" transition:fade >
     <TodoList
       {todos}
       {error}
@@ -132,4 +132,13 @@
 {/if}
 
 <style>
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+  }
 </style>
